@@ -387,8 +387,8 @@ $.payment.validateCardExpiry = (month, year) =>
 
   return false unless month and year
 
-  month = $.trim(month)
-  year  = $.trim(year)
+  month = $.trim(String(month))
+  year  = $.trim(String(year))
 
   return false unless /^\d+$/.test(month)
   return false unless /^\d{1,4}$/.test(year)
@@ -413,7 +413,7 @@ $.payment.validateCardExpiry = (month, year) =>
   expiry > currentTime
 
 $.payment.validateCardCVC = (cvc, type) ->
-  cvc = $.trim(cvc)
+  cvc = $.trim(String(cvc))
   return false unless /^\d+$/.test(cvc)
 
   if type
