@@ -147,11 +147,18 @@ formatCardNumber = (e) ->
 
   upperLength = 16
   upperLength = card.length[card.length.length - 1] if card
-  return if length > upperLength
+  return if length > upperLength or hasTextSelected($target)
 
-  # Return if focus isn't at the end of the text
-  return if $target.prop('selectionStart')? and
-    $target.prop('selectionStart') isnt value.length
+  # if focus is in middle of text, reformat and move cursor
+  cursor = $target.prop('selectionStart')
+  if cursor? and cursor isnt value.length
+    e.preventDefault()
+    value = value.slice(0, cursor) + digit + value.slice(cursor)
+    value = $.payment.formatCardNumber(value)
+    $target.val(value)
+    cursor = if value[cursor] is " " then cursor + 2 else cursor + 1
+    e.currentTarget.setSelectionRange(cursor, cursor)
+    return
 
   if card && card.type is 'amex'
     # Amex cards are formatted differently
@@ -176,14 +183,23 @@ formatBackCardNumber = (e) ->
   $target = $(e.currentTarget)
   value   = $target.val()
 
-  return if e.meta
+  return if e.meta or hasTextSelected($target)
 
   # Return unless backspacing
   return unless e.which is 8
 
-  # Return if focus isn't at the end of the text
-  return if $target.prop('selectionStart')? and
-    $target.prop('selectionStart') isnt value.length
+  # if focus is in middle of text, reformat and reposition cursor
+  cursor = $target.prop('selectionStart')
+  if cursor? and cursor isnt value.length
+    e.preventDefault()
+    if value.charAt(cursor-1) is " " and cursor >= 2
+      value = value.slice(0, cursor - 2) + value.slice(cursor-1)
+    else
+      value = value.slice(0, cursor - 1) + value.slice(cursor)
+    $target.val($.payment.formatCardNumber(value))
+    if value.charAt(cursor-2) is " " and cursor >= 2 then cursor -=2 else cursor -= 1
+    e.currentTarget.setSelectionRange(cursor, cursor)
+    return
 
   # Remove the trailing space
   if /\d\s$/.test(value)
