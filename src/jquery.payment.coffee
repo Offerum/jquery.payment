@@ -442,3 +442,6 @@ $.payment.formatCardNumber = (num) ->
     groups = card.format.exec(num)
     groups?.shift()
     groups?.join(' ')
+
+$.payment.cardTypesList = (card.type for card in cards)
+
